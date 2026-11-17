@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Mono2D (DesktopGL)",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Platforms/DesktopGL/Mono2D.DesktopGL.csproj",
+            "preLaunchTask": "Build: DesktopGL"
+        }
+        ,
+        {
+            "name": "Mono2D (DesktopVK)",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/Platforms/DesktopVK/Mono2D.DesktopVK.csproj",
+            "preLaunchTask": "Build: DesktopVK"
+        }
+    ]
+}

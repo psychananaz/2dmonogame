@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Mono2D/Content/Content.csproj" />
+  <Project Path="Mono2D/Platforms/DesktopGL/Mono2D.DesktopGL.csproj" />
+  <Project Path="Mono2D/Platforms/DesktopVK/Mono2D.DesktopVK.csproj" />
+</Solution>

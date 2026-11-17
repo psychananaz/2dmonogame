@@ -1,0 +1,29 @@
+[
+  {
+    "Name": "DesktopGL",
+    "Projects": [
+      {
+        "Path": "Platforms\\DesktopGL\\Mono2D.DesktopGL.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Content\\Content.csproj",
+        "Action": "None"
+      }
+    ]
+  }
+  ,
+  {
+    "Name": "DesktopVK",
+    "Projects": [
+      {
+        "Path": "Platforms\\DesktopVK\\Mono2D.DesktopVK.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Content\\Content.csproj",
+        "Action": "None"
+      }
+    ]
+  }
+]
