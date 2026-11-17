@@ -1,14 +1,3 @@
-/// <summary>
-/// Entry point for your Content Builder project.
-/// When run it builds your content according to the content collection.
-/// </summary>
-/// <remarks>
-/// For more details regarding the Content Builder, see the MonoGame documentation:
-///
-///    https://docs.monogame.net/articles/getting_started/content_pipeline/content_builder_project.html
-///
-/// </remarks>
-
 using Microsoft.Xna.Framework.Content.Pipeline;
 using MonoGame.Framework.Content.Pipeline.Builder;
 
@@ -16,7 +5,6 @@ using MonoGame.Framework.Content.Pipeline.Builder;
 // If you need to debug the content build process you can enable
 // this, build your game, then attach the debugger when prompted.
 //System.Diagnostics.Debugger.Launch();
-
 
 var builder = new Builder();
 
@@ -52,7 +40,7 @@ public class Builder : ContentBuilder
         // Examples:
         //
         // Import all content in the Assets folder using the default importer for their file type.
-        // content.Include<WildcardRule>("*");
+        content.Include<WildcardRule>("*");
         //
         // Only copy content from the assets folder rather than build it with the pipeline.
         // content.IncludeCopy<WildcardRule>("*.json");

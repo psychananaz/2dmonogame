@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net11.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <UseCurrentRuntimeIdentifier>true</UseCurrentRuntimeIdentifier>
@@ -10,6 +10,7 @@
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="Arch" Version="2.1.0" />
         <PackageReference Include="MonoGame.Framework.Content.Pipeline" Version="3.8.6.1"/>
         <PackageReference Include="MonoGame.Framework.Native" Version="3.8.6.1">
             <PrivateAssets>All</PrivateAssets>
