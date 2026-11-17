@@ -46,8 +46,8 @@ public class CoreEngine : Game
 
     protected override void Update(GameTime gameTime)
     {
-        double rawDelta = gameTime.ElapsedGameTime.TotalSeconds;
-        double delta = rawDelta > MaxFrameDelta ? MaxFrameDelta : rawDelta;
+        var rawDelta = gameTime.ElapsedGameTime.TotalSeconds;
+        var delta = rawDelta > MaxFrameDelta ? MaxFrameDelta : rawDelta;
 
         _stats.Update(rawDelta);
         InputUpdate();
@@ -83,7 +83,7 @@ public class CoreEngine : Game
     {
         _stats.CountDrawFrame();
 
-        float alpha = (float)(_accumulator / FixedStep);
+        var alpha = (float)(_accumulator / FixedStep);
 
         GraphicsDevice.Clear(Color.Black);
 
