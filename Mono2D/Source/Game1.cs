@@ -1,18 +1,17 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Arch;
 
 namespace Mono2D;
 
 public class CoreEngine : Game
 {
-    private const double FixedStep = 1.0 / 60.0;
+    private const double FixedStep = 1.0 / 120.0;
     private const double MaxFrameDelta = 0.25; // avoid running too many updates when rendering is heavy
     private const int RenderLoadSpriteCount = 0;
 
-    private const float PlayerSpeed = 200.0f;
-    private const float PlayerSize = 32.0f;
+    private const float PlayerSpeed = 400;
+    private const float PlayerSize = 16;
 
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
@@ -32,7 +31,10 @@ public class CoreEngine : Game
     private Vector2 _previousPlayerPosition = new Vector2(200, 200);
     private Vector2 _moveDirection;
     private Color _playerColor = Color.Yellow;
-    private int _pressCount;
+
+    private bool _followMouse;
+    private Vector2 _mousePosition;
+    private Vector2 _mousePhysicsPosition;
 
     public int FrameCount { get; private set; }
     public double LogicFrequency { get; private set; }
@@ -42,10 +44,9 @@ public class CoreEngine : Game
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
-        IsMouseVisible = true;
-
+        IsMouseVisible = false;
         IsFixedTimeStep = false;
-        _graphics.SynchronizeWithVerticalRetrace = true;
+        _graphics.SynchronizeWithVerticalRetrace = false;
     }
 
     protected override void LoadContent()
@@ -60,7 +61,7 @@ public class CoreEngine : Game
         double rawDelta = gameTime.ElapsedGameTime.TotalSeconds;
         double delta = rawDelta > MaxFrameDelta ? MaxFrameDelta : rawDelta;
 
-        UpdateFrequencyCounters(rawDelta);
+        UpdateTimers(rawDelta);
         InputUpdate(gameTime);
 
         _accumulator += delta;
@@ -73,7 +74,7 @@ public class CoreEngine : Game
         base.Update(gameTime);
     }
 
-    private void UpdateFrequencyCounters(double rawDelta)
+    private void UpdateTimers(double rawDelta)
     {
         _fpsTimer += rawDelta;
         if (_fpsTimer < 1.0)
@@ -89,29 +90,37 @@ public class CoreEngine : Game
     private void PhysicsUpdate(double fixedDelta)
     {
         _physicsTicks++;
+        // check if input gets through
+        _playerColor = _followMouse ? Color.Red : Color.Yellow;
+        _mousePhysicsPosition = _mousePosition;
         MovePlayer(fixedDelta);
     }
 
     private void MovePlayer(double fixedDelta)
     {
         _previousPlayerPosition = _playerPosition;
-        _playerPosition += _moveDirection * PlayerSpeed * (float)fixedDelta;
+        if (_followMouse)
+        {
+            _playerPosition = _mousePosition;
+        } else {
+            _playerPosition += _moveDirection * PlayerSpeed * (float)fixedDelta;
+        }
     }
 
     private void InputUpdate(GameTime gameTime)
     {
         _oldKeyboardState = _keyboardState;
         _keyboardState = Keyboard.GetState();
+        _mousePosition = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
 
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || _keyboardState.IsKeyDown(Keys.Escape))
             Exit();
 
         if (WasKeyPressed(Keys.Space))
         {
-            _pressCount++;
-            _playerColor = _playerColor == Color.Yellow ? Color.Red : Color.Yellow;
+            _followMouse = !_followMouse;
         }
-
+    
         _moveDirection = GetMoveDirection();
     }
 
@@ -145,12 +154,14 @@ public class CoreEngine : Game
 
         float alpha = (float)(_accumulator / FixedStep);
 
-        GraphicsDevice.Clear(Color.CornflowerBlue);
+        GraphicsDevice.Clear(Color.Black);
 
-        _spriteBatch.Begin();
+        _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp);
         DrawHud();
         DrawRenderLoad();
         DrawPlayer(alpha);
+        DrawCursor();
+        DrawPhysicsCursor();
         _spriteBatch.End();
 
         base.Draw(gameTime);
@@ -161,7 +172,8 @@ public class CoreEngine : Game
         _spriteBatch.DrawString(_font, $"FRAMES: {FrameCount}", new Vector2(10, 10), Color.White);
         _spriteBatch.DrawString(_font, $"LOGIC: {LogicFrequency:0}", new Vector2(10, 30), Color.White);
         _spriteBatch.DrawString(_font, $"DRAW: {DrawFrequency:0}", new Vector2(10, 50), Color.White);
-        _spriteBatch.DrawString(_font, $"PRESSES: {_pressCount}", new Vector2(10, 90), Color.White);
+        _spriteBatch.DrawString(_font, $"POS: {_playerPosition.X:0} {_playerPosition.Y:0}", new Vector2(10, 70), Color.White);
+        
     }
 
     // Simulates heavy rendering so the draw rate drops well below the fixed logic rate.
@@ -173,9 +185,26 @@ public class CoreEngine : Game
         }
     }
 
+
     private void DrawPlayer(float alpha)
     {
-        Vector2 position = Vector2.Lerp(_previousPlayerPosition, _playerPosition, alpha);
-        _spriteBatch.Draw(_debugTexture, position, null, _playerColor, 0.0f, Vector2.Zero, Vector2.One * PlayerSize, SpriteEffects.None, 0.0f);
+        // skip interpolation if following the mouse
+        Vector2 position = _followMouse
+            ? _mousePosition
+            : Vector2.Lerp(_previousPlayerPosition, _playerPosition, alpha);
+        _spriteBatch.Draw(_debugTexture, position, null, _playerColor, 0.0f, Vector2.Zero,
+            Vector2.One * PlayerSize, SpriteEffects.None, 0.0f);
+    }
+    
+    private void DrawCursor()
+    {
+        _spriteBatch.Draw(_debugTexture, _mousePosition, null, Color.White, 0.0f, new
+            Vector2(0.5f), Vector2.One * 6.0f, SpriteEffects.None, 0.0f);
+    }
+    
+    private void DrawPhysicsCursor()
+    {
+        _spriteBatch.Draw(_debugTexture, _mousePhysicsPosition, null, Color.Red, 0.0f, new
+            Vector2(0.5f), Vector2.One * 6.0f, SpriteEffects.None, 0.0f);
     }
 }
