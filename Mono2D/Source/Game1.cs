@@ -9,7 +9,7 @@ public class CoreEngine : Game
 {
     private const double FixedStep = 1.0 / 60.0;
     private const double MaxFrameDelta = 0.25; // avoid running too many updates when rendering is heavy
-    private const int RenderLoadSpriteCount = 1000000;
+    private const int RenderLoadSpriteCount = 0;
 
     private const float PlayerSpeed = 200.0f;
     private const float PlayerSize = 32.0f;
@@ -30,6 +30,7 @@ public class CoreEngine : Game
 
     private Vector2 _playerPosition = new Vector2(200, 200);
     private Vector2 _previousPlayerPosition = new Vector2(200, 200);
+    private Vector2 _moveDirection;
     private Color _playerColor = Color.Yellow;
     private int _pressCount;
 
@@ -44,7 +45,7 @@ public class CoreEngine : Game
         IsMouseVisible = true;
 
         IsFixedTimeStep = false;
-        _graphics.SynchronizeWithVerticalRetrace = false;
+        _graphics.SynchronizeWithVerticalRetrace = true;
     }
 
     protected override void LoadContent()
@@ -59,13 +60,10 @@ public class CoreEngine : Game
         double rawDelta = gameTime.ElapsedGameTime.TotalSeconds;
         double delta = rawDelta > MaxFrameDelta ? MaxFrameDelta : rawDelta;
 
-        _keyboardState = Keyboard.GetState();
-
         UpdateFrequencyCounters(rawDelta);
-        RunFixedSteps(delta);
         InputUpdate(gameTime);
+        RunFixedSteps(delta);
 
-        _oldKeyboardState = _keyboardState;
         base.Update(gameTime);
     }
 
@@ -101,7 +99,28 @@ public class CoreEngine : Game
     private void MovePlayer(double fixedDelta)
     {
         _previousPlayerPosition = _playerPosition;
+        _playerPosition += _moveDirection * PlayerSpeed * (float)fixedDelta;
+    }
 
+    private void InputUpdate(GameTime gameTime)
+    {
+        _oldKeyboardState = _keyboardState;
+        _keyboardState = Keyboard.GetState();
+
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || _keyboardState.IsKeyDown(Keys.Escape))
+            Exit();
+
+        if (WasKeyPressed(Keys.Space))
+        {
+            _pressCount++;
+            _playerColor = _playerColor == Color.Yellow ? Color.Red : Color.Yellow;
+        }
+
+        _moveDirection = ReadMoveDirection();
+    }
+
+    private Vector2 ReadMoveDirection()
+    {
         Vector2 direction = Vector2.Zero;
         if (_keyboardState.IsKeyDown(Keys.W) || _keyboardState.IsKeyDown(Keys.Up))
             direction.Y -= 1;
@@ -115,21 +134,7 @@ public class CoreEngine : Game
         if (direction != Vector2.Zero)
             direction.Normalize();
 
-        _playerPosition += direction * PlayerSpeed * (float)fixedDelta;
-    }
-
-    // Single presses are handled here instead of in PhysicsUpdate because a tap that starts and
-    // ends between two fixed steps would never be seen there, and this runs every frame for lower latency.
-    private void InputUpdate(GameTime gameTime)
-    {
-        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || _keyboardState.IsKeyDown(Keys.Escape))
-            Exit();
-
-        if (WasKeyPressed(Keys.Space))
-        {
-            _pressCount++;
-            _playerColor = _playerColor == Color.Yellow ? Color.Red : Color.Yellow;
-        }
+        return direction;
     }
 
     private bool WasKeyPressed(Keys key)
