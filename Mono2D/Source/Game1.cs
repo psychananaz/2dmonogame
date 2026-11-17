@@ -62,7 +62,13 @@ public class CoreEngine : Game
 
         UpdateFrequencyCounters(rawDelta);
         InputUpdate(gameTime);
-        RunFixedSteps(delta);
+
+        _accumulator += delta;
+        while (_accumulator >= FixedStep)
+        {
+            _accumulator -= FixedStep;
+            PhysicsUpdate(FixedStep);
+        }
 
         base.Update(gameTime);
     }
@@ -78,16 +84,6 @@ public class CoreEngine : Game
         _physicsTicks = 0;
         _drawFrames = 0;
         _fpsTimer = 0.0;
-    }
-
-    private void RunFixedSteps(double delta)
-    {
-        _accumulator += delta;
-        while (_accumulator >= FixedStep)
-        {
-            _accumulator -= FixedStep;
-            PhysicsUpdate(FixedStep);
-        }
     }
 
     private void PhysicsUpdate(double fixedDelta)
@@ -116,10 +112,10 @@ public class CoreEngine : Game
             _playerColor = _playerColor == Color.Yellow ? Color.Red : Color.Yellow;
         }
 
-        _moveDirection = ReadMoveDirection();
+        _moveDirection = GetMoveDirection();
     }
 
-    private Vector2 ReadMoveDirection()
+    private Vector2 GetMoveDirection()
     {
         Vector2 direction = Vector2.Zero;
         if (_keyboardState.IsKeyDown(Keys.W) || _keyboardState.IsKeyDown(Keys.Up))
