@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Mono2D.Controllers;
 using Mono2D.Debug;
 using Mono2D.Entities;
 using Mono2D.Input;
@@ -17,9 +18,10 @@ public class CoreEngine : Game
     private Texture2D _debugTexture;
     private DebugOverlay _debugOverlay;
 
-    private readonly InputState _input = new InputState();
-    private readonly FrameStats _stats = new FrameStats();
-    private readonly Player _player = new Player();
+    private readonly InputHandler _input = new();
+    private readonly FrameStats _stats = new();
+    private readonly Player _player = new();
+    private readonly PlayerController _playerController;
 
     private double _accumulator;
     private Vector2 _mousePhysicsPosition;
@@ -31,6 +33,8 @@ public class CoreEngine : Game
         IsMouseVisible = false;
         IsFixedTimeStep = false;
         _graphics.SynchronizeWithVerticalRetrace = false;
+
+        _playerController = new PlayerController(_input, _player);
     }
 
     protected override void LoadContent()
@@ -62,20 +66,17 @@ public class CoreEngine : Game
     {
         _stats.CountPhysicsTick();
         _mousePhysicsPosition = _input.MousePosition;
-        _player.Update(fixedDelta, _input.MoveDirection, _input.MousePosition);
+        _player.Update(fixedDelta);
     }
 
     private void InputUpdate()
     {
         _input.Update();
 
-        if (_input.IsExitRequested())
+        if (_input.IsKeyDown(Keys.Escape) || _input.IsButtonDown(Buttons.Back))
             Exit();
 
-        if (_input.WasKeyPressed(Keys.Space))
-        {
-            _player.FollowMouse = !_player.FollowMouse;
-        }
+        _playerController.Update();
     }
 
     protected override void Draw(GameTime gameTime)
@@ -89,7 +90,7 @@ public class CoreEngine : Game
         _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp);
         _debugOverlay.DrawHud(_spriteBatch, _stats, _player.Position);
         _debugOverlay.DrawRenderLoad(_spriteBatch);
-        _player.Draw(_spriteBatch, _debugTexture, alpha, _input.MousePosition);
+        _player.Draw(_spriteBatch, _debugTexture, alpha);
         _debugOverlay.DrawCursor(_spriteBatch, _input.MousePosition, Color.White);
         _debugOverlay.DrawCursor(_spriteBatch, _mousePhysicsPosition, Color.Red);
         _spriteBatch.End();
