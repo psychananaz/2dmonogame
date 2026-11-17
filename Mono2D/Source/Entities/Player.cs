@@ -25,7 +25,9 @@ public class Player
         if (FollowMouse)
         {
             Position = FollowTarget;
-        } else {
+        }
+        else
+        {
             Position += MoveDirection * Speed * (float)fixedDelta;
         }
     }

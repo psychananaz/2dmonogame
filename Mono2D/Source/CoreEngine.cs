@@ -88,11 +88,17 @@ public class CoreEngine : Game
         GraphicsDevice.Clear(Color.Black);
 
         _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp);
-        _debugOverlay.DrawHud(_spriteBatch, _stats, _player.Position);
+        
+        _debugOverlay.DrawDebugHud(_spriteBatch, _stats, _player.Position);
         _debugOverlay.DrawRenderLoad(_spriteBatch);
+        
         _player.Draw(_spriteBatch, _debugTexture, alpha);
+        
+        // draw mouse on "real" position and another on the "fake" position
+        // to show the difference between the two
         _debugOverlay.DrawCursor(_spriteBatch, _input.MousePosition, Color.White);
         _debugOverlay.DrawCursor(_spriteBatch, _mousePhysicsPosition, Color.Red);
+        
         _spriteBatch.End();
 
         base.Draw(gameTime);

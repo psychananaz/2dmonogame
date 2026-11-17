@@ -16,7 +16,7 @@ public class DebugOverlay
         _texture = texture;
     }
 
-    public void DrawHud(SpriteBatch spriteBatch, FrameStats stats, Vector2 playerPosition)
+    public void DrawDebugHud(SpriteBatch spriteBatch, FrameStats stats, Vector2 playerPosition)
     {
         spriteBatch.DrawString(_font, $"FRAMES: {stats.FrameCount}", new Vector2(10, 10), Color.White);
         spriteBatch.DrawString(_font, $"LOGIC: {stats.LogicFrequency:0}", new Vector2(10, 30), Color.White);
