@@ -24,15 +24,6 @@ public class DebugOverlay
         spriteBatch.DrawString(_font, $"POS: {playerPosition.X:0} {playerPosition.Y:0}", new Vector2(10, 70), Color.White);
     }
 
-    // Simulates heavy rendering so the draw rate drops well below the fixed logic rate.
-    public void DrawRenderLoad(SpriteBatch spriteBatch)
-    {
-        for (int i = 0; i < RenderLoadSpriteCount; i++)
-        {
-            spriteBatch.Draw(_texture, new Vector2(10, 70), null, Color.White, 0.0f, Vector2.Zero, Vector2.One * 10.0f, SpriteEffects.None, 0.0f);
-        }
-    }
-
     public void DrawCursor(SpriteBatch spriteBatch, Vector2 position, Color color)
     {
         spriteBatch.Draw(_texture, position, null, color, 0.0f, new

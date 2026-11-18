@@ -10,7 +10,7 @@ namespace Mono2D;
 
 public class CoreEngine : Game
 {
-    private const double FixedStep = 1.0 / 120.0;
+    private const double FixedStep = 1.0 / 60.0;
     private const double MaxFrameDelta = 0.25; // avoid running too many updates when rendering is heavy
 
     private readonly GraphicsDeviceManager _graphics;
@@ -90,7 +90,6 @@ public class CoreEngine : Game
         _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.PointClamp);
         
         _debugOverlay.DrawDebugHud(_spriteBatch, _stats, _player.Position);
-        _debugOverlay.DrawRenderLoad(_spriteBatch);
         
         _player.Draw(_spriteBatch, _debugTexture, alpha);
         
