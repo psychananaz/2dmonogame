@@ -26,13 +26,14 @@ public class CoreEngine : Game
     private double _accumulator;
     private Vector2 _mousePhysicsPosition;
 
+    private int _maxFps = 0;
+
     public CoreEngine()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = false;
         IsFixedTimeStep = false;
-        _graphics.SynchronizeWithVerticalRetrace = false;
 
         _playerController = new PlayerController(_input, _player);
     }
@@ -50,7 +51,7 @@ public class CoreEngine : Game
         var delta = rawDelta > MaxFrameDelta ? MaxFrameDelta : rawDelta;
 
         _stats.Update(rawDelta);
-        InputUpdate();
+        UiInputUpdate();
 
         _accumulator += delta;
         while (_accumulator >= FixedStep)
@@ -69,7 +70,7 @@ public class CoreEngine : Game
         _player.Update(fixedDelta);
     }
 
-    private void InputUpdate()
+    private void UiInputUpdate()
     {
         _input.Update();
 

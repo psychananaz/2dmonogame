@@ -6,7 +6,7 @@ namespace Mono2D.Entities;
 public class Player
 {
     private const float Speed = 400;
-    private const float Size = 16;
+    private const float Size = 32;
 
     private Vector2 _previousPosition = new Vector2(200, 200);
     private Color _color = Color.Yellow;
