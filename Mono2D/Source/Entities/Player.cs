@@ -35,7 +35,7 @@ public class Player
     public void Draw(SpriteBatch spriteBatch, Texture2D texture, float alpha)
     {
         // skip interpolation if following the mouse
-        Vector2 position = FollowMouse
+        var position = FollowMouse
             ? FollowTarget
             : Vector2.Lerp(_previousPosition, Position, alpha);
         spriteBatch.Draw(texture, position, null, _color, 0.0f, Vector2.Zero,
