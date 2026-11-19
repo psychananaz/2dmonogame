@@ -1,11 +1,14 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Mono2D.Input;
 
 namespace Mono2D.Entities;
 
 public class Player
 {
-    private const float Speed = 400;
+    private const float Speed = 600;
     private const float Size = 32;
 
     private Vector2 _previousPosition = new Vector2(200, 200);
@@ -15,25 +18,48 @@ public class Player
     public bool FollowMouse { get; set; }
     public Vector2 MoveDirection { get; set; }
     public Vector2 FollowTarget { get; set; }
+    private Vector2 _velocity = Vector2.Zero;
 
     public void Update(double fixedDelta)
     {
-        // check if input gets through
-        _color = FollowMouse ? Color.Red : Color.Yellow;
-
+        float dt = (float)fixedDelta;
         _previousPosition = Position;
+
         if (FollowMouse)
         {
             Position = FollowTarget;
+            _velocity = Vector2.Zero;
+            return;
         }
-        else
+
+        _velocity -= _velocity * 10f * dt;
+        if (MoveDirection != Vector2.Zero)
         {
-            Position += MoveDirection * Speed * (float)fixedDelta;
+            _velocity += MoveDirection * (Speed * 15f) * dt;
         }
+        
+        if (_velocity.Length() > Speed)
+        {
+            _velocity.Normalize();
+            _velocity *= Speed;
+        }
+        
+        if (MoveDirection == Vector2.Zero && _velocity.Length() < 1.0f)
+        {
+            _velocity = Vector2.Zero;
+        }
+        
+        Position += _velocity * (float)fixedDelta;
     }
+
 
     public void Draw(SpriteBatch spriteBatch, Texture2D texture, float alpha)
     {
+       Console.WriteLine(_velocity);
+       
+       spriteBatch.Draw(texture, _previousPosition, null, Color.Red, 0.0f, Vector2.Zero,
+           Vector2.One * Size, SpriteEffects.None, 0.0f);
+        
         // skip interpolation if following the mouse
         var position = FollowMouse
             ? FollowTarget

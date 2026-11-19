@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -10,7 +12,7 @@ namespace Mono2D;
 
 public class CoreEngine : Game
 {
-    private const double FixedStep = 1.0 / 60.0;
+    private const double FixedStep = 1.0 / 120.0;
     private const double MaxFrameDelta = 0.25; // avoid running too many updates when rendering is heavy
 
     private readonly GraphicsDeviceManager _graphics;
@@ -18,7 +20,7 @@ public class CoreEngine : Game
     private Texture2D _debugTexture;
     private DebugOverlay _debugOverlay;
 
-    private readonly InputHandler _input = new();
+    public static InputHandler _input = new();
     private readonly FrameStats _stats = new();
     private readonly Player _player = new();
     private readonly PlayerController _playerController;
@@ -26,7 +28,9 @@ public class CoreEngine : Game
     private double _accumulator;
     private Vector2 _mousePhysicsPosition;
 
-    private int _maxFps = 0;
+    private readonly Stopwatch _clock = Stopwatch.StartNew();
+    private double _nextDrawTime;
+    private readonly double _maxFps = 200.0;   // 0 = uncapped
 
     public CoreEngine()
     {
@@ -34,6 +38,7 @@ public class CoreEngine : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = false;
         IsFixedTimeStep = false;
+        _graphics.SynchronizeWithVerticalRetrace = false;
 
         _playerController = new PlayerController(_input, _player);
     }
@@ -43,6 +48,27 @@ public class CoreEngine : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _debugTexture = Content.Load<Texture2D>("Textures/pixel");
         _debugOverlay = new DebugOverlay(Content.Load<SpriteFont>("Fonts/Hud"), _debugTexture);
+    }
+    
+    private void LimitDrawRate()
+    {
+        if (_maxFps <= 0.0) return;
+
+        double target = 1.0 / _maxFps;
+        double now = _clock.Elapsed.TotalSeconds;
+
+        if (_nextDrawTime == 0.0) _nextDrawTime = now;
+
+        while (_clock.Elapsed.TotalSeconds < _nextDrawTime)
+        {
+            double remaining = _nextDrawTime - _clock.Elapsed.TotalSeconds;
+            if (remaining > 0.002) Thread.Sleep(1);
+            else Thread.SpinWait(100); // just spinwait if there is smol time remaining
+        }
+
+        now = _clock.Elapsed.TotalSeconds;
+        _nextDrawTime += target;
+        if (_nextDrawTime < now) _nextDrawTime = now;  // fell behind, don't accumulate debt
     }
 
     protected override void Update(GameTime gameTime)
@@ -82,6 +108,7 @@ public class CoreEngine : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        LimitDrawRate();
         _stats.CountDrawFrame();
 
         var alpha = (float)(_accumulator / FixedStep);
